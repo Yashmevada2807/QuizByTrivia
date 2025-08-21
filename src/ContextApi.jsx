@@ -6,19 +6,25 @@ export const quizDataContext = createContext()
 
 const ContextApi = ({ children }) => {
 
-    const [formData, setFormData] = useState({
-        amount: 10,
-        difficulty: 'easy',
-        type: 'multiple',
-    })
+  const [formData, setFormData] = useState({
+    amount: 10,
+    difficulty: 'easy',
+    type: 'multiple',
+  })
+  const [quizData, setQuizData] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [crrIndex, setCrrIndex] = useState(0)
+  const [score, setScore] = useState(0)
+  const [correctAnswer, setCorrectAnswer] = useState(0)
+  const [wrongAnswer, setWrongAnswer] = useState(0)
+  const [skipedAnswer, setSkipedAnswer] = useState(0)
+  const [userAnswers, setUserAnswers] = useState(Array(quizData.length).fill(null))
+  const [answerStatus, setAnswerStatus] = useState([])
+  const [isQuizStart, setIsQuizStart] = useState(false)
+  const [isSubmitQuiz, setIsSubmitQuiz] = useState(false)
 
-    const [quizData, setQuizData] = useState([])
-    const [loading, setLoading] = useState(false)
-    const [crrIndex, setCrrIndex] = useState(0)
-    const [score, setScore] = useState(0)
-    const [correctAnswer, setCorrectAnswer] = useState(null)
-    const [userAnswers, setUserAnswers] = useState(Array(quizData.length).fill(null))
-    const data = async () => {
+
+  const data = async () => {
     setLoading(true); // show loader
     try {
       const res = await axios.get("https://opentdb.com/api.php?", {
@@ -28,21 +34,21 @@ const ContextApi = ({ children }) => {
           difficulty: formData.difficulty
         }
       });
-      setQuizData(res.data.results);  
+      setQuizData(res.data.results);
     } catch (err) {
       console.error("API Error:", err);
     } finally {
       setLoading(false); // hide loader
     }
-    }
+  }
 
-    return (
-        <>
-            <quizDataContext.Provider value={{ formData, setFormData, quizData, setQuizData, data, crrIndex, setCrrIndex, loading, score, setScore, correctAnswer, setCorrectAnswer, userAnswers, setUserAnswers }} >
-                {children}
-            </quizDataContext.Provider>
-        </>
-    )
+  return (
+    <>
+      <quizDataContext.Provider value={{ formData, setFormData, quizData, setQuizData, data, crrIndex, setCrrIndex, loading, score, setScore, correctAnswer, setCorrectAnswer, userAnswers, setUserAnswers, isQuizStart, setIsQuizStart, wrongAnswer, setWrongAnswer, skipedAnswer, setSkipedAnswer, isSubmitQuiz, setIsSubmitQuiz, answerStatus, setAnswerStatus}} >
+        {children}
+      </quizDataContext.Provider>
+    </>
+  )
 }
 
 export default ContextApi
