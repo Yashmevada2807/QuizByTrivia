@@ -5,6 +5,8 @@ import UserChoice from './components/UserChoice'
 import { quizDataContext } from './ContextApi'
 import { Route, Routes } from 'react-router-dom'
 import SubmitQuiz from './components/SubmitQuiz'
+import LuminaAiChatBot from './components/LuminaAiChatBot'
+import SubmitModal from './components/SubmitModal'
 
 function App() {
 
@@ -23,7 +25,7 @@ function App() {
             <UserChoice onStart={() => setIsQuizStart(true)} />
           )
         }
-        {/* <SubmitQuiz/> */}
+        {/* <SubmitModal/> */}
       </div>
     </>
   )

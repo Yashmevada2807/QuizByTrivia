@@ -22,7 +22,9 @@ const ContextApi = ({ children }) => {
   const [answerStatus, setAnswerStatus] = useState([])
   const [isQuizStart, setIsQuizStart] = useState(false)
   const [isSubmitQuiz, setIsSubmitQuiz] = useState(false)
-
+  const [isAskAiTrue, setIsAskAiTrue] = useState(false)
+  const [isModal, setIsModal] = useState(false)
+  const [percentage, setpercentage] = useState(0)
 
   const data = async () => {
     setLoading(true); // show loader
@@ -38,13 +40,13 @@ const ContextApi = ({ children }) => {
     } catch (err) {
       console.error("API Error:", err);
     } finally {
-      setLoading(false); // hide loader
+      // setLoading(false); // hide loader
     }
   }
 
   return (
     <>
-      <quizDataContext.Provider value={{ formData, setFormData, quizData, setQuizData, data, crrIndex, setCrrIndex, loading, score, setScore, correctAnswer, setCorrectAnswer, userAnswers, setUserAnswers, isQuizStart, setIsQuizStart, wrongAnswer, setWrongAnswer, skipedAnswer, setSkipedAnswer, isSubmitQuiz, setIsSubmitQuiz, answerStatus, setAnswerStatus}} >
+      <quizDataContext.Provider value={{ formData, setFormData, quizData, setQuizData, data, crrIndex, setCrrIndex, loading, setLoading, score, setScore, correctAnswer, setCorrectAnswer, userAnswers, setUserAnswers, isQuizStart, setIsQuizStart, wrongAnswer, setWrongAnswer, skipedAnswer, setSkipedAnswer, isSubmitQuiz, setIsSubmitQuiz, answerStatus, setAnswerStatus, isAskAiTrue, setIsAskAiTrue, isModal, setIsModal, percentage, setpercentage}} >
         {children}
       </quizDataContext.Provider>
     </>
