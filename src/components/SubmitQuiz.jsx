@@ -3,7 +3,7 @@ import { quizDataContext } from '../ContextApi'
 
 const SubmitQuiz = () => {
 
-    const { quizData, score, wrongAnswer, correctAnswer, setIsQuizStart, setIsSubmitQuiz, setScore, setCorrectAnswer, setWrongAnswer, setSkipedAnswer, setUserAnswers, setCrrIndex, setAnswerStatus } = useContext(quizDataContext)
+    const { quizData, score, wrongAnswer, correctAnswer, skipedAnswer, setIsQuizStart, setIsSubmitQuiz, setScore, setCorrectAnswer, setWrongAnswer, setSkipedAnswer, setUserAnswers, setCrrIndex, setAnswerStatus, setIsModal } = useContext(quizDataContext)
 
     const tryAgain = () => {
         setIsSubmitQuiz(false)
@@ -11,18 +11,20 @@ const SubmitQuiz = () => {
         setUserAnswers(Array(quizData.length).fill(null))
         setAnswerStatus([])
         setIsQuizStart(true)
+        setIsModal(false)
         setScore(0)
         setCorrectAnswer(0)
         setWrongAnswer(0)
         setSkipedAnswer(0)
     }
-
+    
     const backToMenu = () => {
         setIsSubmitQuiz(false)
         setCrrIndex(0)
         setUserAnswers(Array(quizData.length).fill(null))
         setAnswerStatus([])
         setIsQuizStart(false)
+        setIsModal(false)
         setScore(0)
         setCorrectAnswer(0)
         setWrongAnswer(0)
@@ -54,6 +56,7 @@ const SubmitQuiz = () => {
                 <div className='rounded-2xl bg-gray-900 min-w-[200px] w-[600px] max-w-[1000px]  py-7 flex flex-col justify-start items-center'>
                     <h1 className='mb-2 px-2 py-1 text-lg text-green-500 font-semibold'>Correct Answers - <span>{correctAnswer}</span></h1>
                     <h1 className='mb-2 px-2 py-1 text-lg text-red-600 font-semibold'>Wrong Answers - <span>{wrongAnswer}</span></h1>
+                    {/* <h1 className='mb-2 px-2 py-1 text-lg text-gray-400 font-semibold'>Skiped Answers - <span>{skipedAnswer}</span></h1> */}
                 </div>
             </div>
             <div className="button w-full mt-20 flex justify-center items-center gap-4">
