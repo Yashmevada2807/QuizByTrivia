@@ -15,7 +15,7 @@ const UserChoice = ({ onStart }) => {
         e.preventDefault()
         await data()
         setTimeout(() => {
-            onStart()
+        onStart()
         }, 1000)
         // navigate('/quiz')
     }
