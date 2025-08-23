@@ -2,18 +2,11 @@ import React, { useContext, useState } from "react";
 import { quizDataContext } from "../ContextApi";
 
 const LuminaAiChatBot = () => {
-
-    const { setIsAskAiTrue } = useContext(quizDataContext)
     const [inputField, setInputField] = useState("");
     const [messages, setMessages] = useState([]);
     const [loading, setloading] = useState(false);
 
-
-    const cancelAiBot = () => {
-        setIsAskAiTrue(false)
-    }
-
-
+    const cancelAiBot = () => {}
     const handleResponse = async (e) => {
         e.preventDefault();
         if (!inputField.trim()) return;
