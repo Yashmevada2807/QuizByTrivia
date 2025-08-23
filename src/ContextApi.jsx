@@ -12,7 +12,7 @@ const ContextApi = ({ children }) => {
     type: 'multiple',
   })
   const [quizData, setQuizData] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setIsloading] = useState(false)
   const [crrIndex, setCrrIndex] = useState(0)
   const [score, setScore] = useState(0)
   const [correctAnswer, setCorrectAnswer] = useState(0)
@@ -25,9 +25,13 @@ const ContextApi = ({ children }) => {
   const [isAskAiTrue, setIsAskAiTrue] = useState(false)
   const [isModal, setIsModal] = useState(false)
   const [percentage, setpercentage] = useState(0)
+  const [crrquestionTimer, setCrrQuestionTimer] = useState({})
+  const [timeIntervalByQuestion, setTimeIntervalByQuestion] = useState({})
+  const [isRunning, setisRunning] = useState(false)
+
 
   const data = async () => {
-    setLoading(true); // show loader
+    setIsloading(true); // show loader
     try {
       const res = await axios.get("https://opentdb.com/api.php?", {
         params: {
@@ -46,7 +50,7 @@ const ContextApi = ({ children }) => {
 
   return (
     <>
-      <quizDataContext.Provider value={{ formData, setFormData, quizData, setQuizData, data, crrIndex, setCrrIndex, loading, setLoading, score, setScore, correctAnswer, setCorrectAnswer, userAnswers, setUserAnswers, isQuizStart, setIsQuizStart, wrongAnswer, setWrongAnswer, skipedAnswer, setSkipedAnswer, isSubmitQuiz, setIsSubmitQuiz, answerStatus, setAnswerStatus, isAskAiTrue, setIsAskAiTrue, isModal, setIsModal, percentage, setpercentage}} >
+      <quizDataContext.Provider value={{ formData, setFormData, quizData, setQuizData, data, crrIndex, setCrrIndex, loading,  setIsloading, score, setScore, correctAnswer, setCorrectAnswer, userAnswers, setUserAnswers, isQuizStart, setIsQuizStart, wrongAnswer, setWrongAnswer, skipedAnswer, setSkipedAnswer, isSubmitQuiz, setIsSubmitQuiz, answerStatus, setAnswerStatus, isAskAiTrue, setIsAskAiTrue, isModal, setIsModal, percentage, setpercentage, crrquestionTimer, setCrrQuestionTimer, timeIntervalByQuestion, setTimeIntervalByQuestion, isRunning, setisRunning}} >
         {children}
       </quizDataContext.Provider>
     </>
