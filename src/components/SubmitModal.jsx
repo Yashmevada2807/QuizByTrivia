@@ -2,25 +2,17 @@ import React, { useContext, useState } from 'react'
 import SubmitModalCard from './SubmitModalCard'
 import { quizDataContext } from '../ContextApi'
 
-const SubmitModal = ({ onSubmit }) => {
+const SubmitModal = () => {
 
     const { isModal, setIsModal } = useContext(quizDataContext)
 
-    const closeModal = () => {
-        console.log('you want to cancel');
-        setIsModal(false)
-    }
+    const closeModal = () => {}
 
-    const submitQuiz = () => {
-        onSubmit()
-        setIsModal(false)
-    }
+    const submitQuiz = () => {}
 
     return (
         <>
-        { isModal && (
-            <SubmitModalCard submitQuiz={submitQuiz} closeModal={closeModal} />
-        )}
+        <SubmitModalCard submitQuiz={submitQuiz} closeModal={closeModal} />
         </>
     )
 }
