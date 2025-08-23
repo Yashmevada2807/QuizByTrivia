@@ -7,25 +7,17 @@ import { Route, Routes } from 'react-router-dom'
 import SubmitQuiz from './components/SubmitQuiz'
 import LuminaAiChatBot from './components/LuminaAiChatBot'
 import SubmitModal from './components/SubmitModal'
+import { useSelector } from 'react-redux'
 
 function App() {
-
-  const { isQuizStart, setIsQuizStart, isSubmitQuiz, setIsSubmitQuiz } = useContext(quizDataContext)
+  const {isQuizStart} = useSelector(s => s.quiz)
   return (
     <>
       <div className=' w-full min-h-screen flex justify-center items-center bg-gray-900'>
         {
-          isQuizStart ? (
-            isSubmitQuiz ? (
-              <SubmitQuiz />
-            ) : (
-              <QuizzCard onSubmit={() => setIsSubmitQuiz(true)} />
-            )
-          ) : (
-            <UserChoice onStart={() => setIsQuizStart(true)} />
-          )
+          isQuizStart ?
+             <QuizzCard/> : <UserChoice/> 
         }
-        {/* <SubmitModal/> */}
       </div>
     </>
   )
