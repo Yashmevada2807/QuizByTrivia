@@ -1,26 +1,28 @@
-import React, {useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { fetchedQuizData, setFormData } from '../features/quizz/quizzSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
 const UserChoice = () => {
 
-    const { quizData, isLoading, status,formData, isQuizStart } = useSelector(s => s.quiz)
+    const { quizData, isLoading, status, formData, isQuizStart, } = useSelector(s => s.quiz)
     const dispatch = useDispatch()
+
+    useEffect(() => {
+        console.log('Data - ', quizData);
+        console.log('Status - ', status)
+        console.log('Loading - ', isLoading)
+        console.log('QuizStarted - ', isQuizStart);
+    }, [quizData, isLoading, status, isQuizStart])
+    
     const handleChange = (e) => {
-        const {name, value} = e.target
-        dispatch(setFormData({name, value}))
+        const { name, value } = e.target
+        dispatch(setFormData({ name, value }))
     }
+
     const handleSubmit = (e) => {
         e.preventDefault()
         dispatch(fetchedQuizData({ amount: formData.amount, type: formData.type, difficulty: formData.difficulty }))
     }
-
-    useEffect(() => {
-        console.log('Data - ',quizData);
-        console.log('Status - ',status)
-        console.log('Loading - ',isLoading)   
-        console.log('QuizStarted - ',isQuizStart);
-    }, [quizData, isLoading, status, isQuizStart])
 
     return (
         <div className=' min-w-[300px] w-[700px] max-w-[780px] rounded-lg px-4 py-4 bg-gray-800'>
@@ -28,58 +30,58 @@ const UserChoice = () => {
             {/* SubmitQuizDataForm */}
             <form onSubmit={handleSubmit} className='w-full py-6'>
                 {/* QuestionsSelectionSection */}
-            <section className=' py-5'>
-                <label className='text-2xl text-gray-300 w-full py-2' >Select Amount Of Question's</label>
-                <br />
-                <select
-                    className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
-                    id="amount"
-                    name="amount"
-                    value={formData.amount}
-                    onChange={handleChange}
-                >
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                </select>
-            </section>
-            {/* DifficultySelectionSection */}
-            <section className=' py-5'>
-                <label className='text-2xl text-gray-300 w-full py-2' >Select Difficulty</label>
-                <br />
-                <select
-                    className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
-                    id="difficulty"
-                    name="difficulty"
-                    value={formData.difficulty}
-                    onChange={handleChange}
-                >
-                    {/* <option value="anytype">Any Difficulty</option> */}
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
+                <section className=' py-5'>
+                    <label className='text-2xl text-gray-300 w-full py-2' >Select Amount Of Question's</label>
+                    <br />
+                    <select
+                        className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
+                        id="amount"
+                        name="amount"
+                        value={formData.amount}
+                        onChange={handleChange}
+                    >
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                    </select>
+                </section>
+                {/* DifficultySelectionSection */}
+                <section className=' py-5'>
+                    <label className='text-2xl text-gray-300 w-full py-2' >Select Difficulty</label>
+                    <br />
+                    <select
+                        className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
+                        id="difficulty"
+                        name="difficulty"
+                        value={formData.difficulty}
+                        onChange={handleChange}
+                    >
+                        {/* <option value="anytype">Any Difficulty</option> */}
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
 
-                </select>
-            </section>
-            {/* TypeSelectionSection */}
-            <section className=' py-5'>
-                <label className='text-2xl text-gray-300 w-full py-2' >Select Type</label>
-                <br />
-                <select
-                    className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
-                    id="type"
-                    name="type"
-                    value={formData.type}
-                    onChange={handleChange}
-                >
-                    {/* <option value="anytype">Any Type</option> */}
-                    <option value="multiple">Multiple</option>
-                    <option value="boolean">True/False</option>
-                </select>
-            </section>
-            {/* SubmitBtn */}
-            <div className=' flex justify-center items-center p-3'>
+                    </select>
+                </section>
+                {/* TypeSelectionSection */}
+                <section className=' py-5'>
+                    <label className='text-2xl text-gray-300 w-full py-2' >Select Type</label>
+                    <br />
+                    <select
+                        className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
+                        id="type"
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                    >
+                        {/* <option value="anytype">Any Type</option> */}
+                        <option value="multiple">Multiple</option>
+                        <option value="boolean">True/False</option>
+                    </select>
+                </section>
+                {/* SubmitBtn */}
+                <div className=' flex justify-center items-center p-3'>
                     <button type='submit' className=' px-6 py-3 cursor-pointer text-white text-lg font-semibold bg-orange-500 rounded-2xl'>
                         {
                             isLoading ? <span className='text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-center dark:focus:ring-blue-800 inline-flex items-center'>
@@ -91,7 +93,7 @@ const UserChoice = () => {
                         }
                     </button>
                 </div>
-            </form> 
+            </form>
         </div>
     )
 }
