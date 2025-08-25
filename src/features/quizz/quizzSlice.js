@@ -32,7 +32,7 @@ export const quizSlice = createSlice({
         isModal: false,
         isSubmitQuiz: false,
         isQuizStart: false,
-        userAnswers: ([])
+        userAnswers: []
         // Array(quizData.length).fill(null)
     },
     reducers: {
@@ -43,12 +43,24 @@ export const quizSlice = createSlice({
             state.formData[name] = value
         },
         setScore: (state) => state.score += 1,
-        setCorrectAnswer: (state) => state.correctAnswer += 1,
+        setCorrectAnswer: (state) => {
+            state.correctAnswer += 1
+        },
         setIncorrectAnswer: (state) => state.incorrectAnswer += 1,
         setSkippedAnswer: (state) => state.skippedAnswer += 1,
-        setCrrIndex: (state) => state.crrIndex += 1,
+        setCrrIndex : (state, action) => {
+            state.crrIndex = action.payload
+        },
+        setIncrementCrrIndex: (state) => {
+            state.crrIndex += 1
+        },
+        setDecrementCrrIndex:(state) => {
+            state.crrIndex -= 1
+        },
         setQuestionInterval: (state, action) => { },
-        setUserAnswer: (state, action) => { }
+        setUserAnswer: (state, action) => {
+            state.userAnswers = action.payload
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -70,6 +82,6 @@ export const quizSlice = createSlice({
     }
 })
 
-export const { setFormData } = quizSlice.actions
+export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer } = quizSlice.actions
 
 export const quizReducer = quizSlice.reducer
