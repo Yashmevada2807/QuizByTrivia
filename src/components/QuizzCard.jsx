@@ -3,27 +3,65 @@ import { quizDataContext } from '../ContextApi'
 import LuminaAiChatBot from './LuminaAiChatBot'
 import { toast, Bounce } from 'react-toastify'
 import SubmitModalCard from './SubmitModalCard'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIncrementCrrIndex, setDecrementCrrIndex, setCrrIndex,setUserAnswer } from '../features/quizz/quizzSlice'
+
 const QuizzCard = () => {
 
-  const skipQuestion = () => {}
+  const { isQuizStart, isLoading, status, quizData, crrIndex, userAnswer } = useSelector(s => s.quiz)
+  const dispatch = useDispatch()
+
+  const Question = quizData[crrIndex]
+  const options = [Question.correct_answer, ...Question.incorrect_answers]
+  const DefaultAnswersData = [Array(quizData.length).fill(null)] 
+
+  const skipQuestion = () => { }
   // SubmitQuizFunc
-  const SubmitQuiz = () => {}
+  const SubmitQuiz = () => { }
   // NextQuestionFunc
-  const nextQuestion = () => {}
+  const nextQuestion = () => {
+    if (crrIndex < quizData.length - 1) {
+      dispatch(setIncrementCrrIndex())
+    } else {
+      console.log('No more questions');
+    }
+  }
   // PrevQuestionFunc
-  const PrevQuestion = () => {}
+  const PrevQuestion = () => {
+    if (crrIndex === 0) {
+      console.log('First Question');
+    } else {
+      dispatch(setDecrementCrrIndex())
+    }
+  }
   // findQuestionWithIndexFunc
-  const findQuestionWithIndex = (index) => {}
+  const findQuestionWithIndex = (index) => {
+    dispatch(setCrrIndex(index))
+  }
   // StartTimerFunc
-  const startTimer = (qIndex) => {}
+  const startTimer = (qIndex) => { }
   // StopTimerFunc
-  const stopTimer = (qIndex) => {}
+  const stopTimer = (qIndex) => { }
   // Progress tracker
-  useEffect(() => {}, [])
+  useEffect(() => {
+    console.log('Status - ', status)
+    console.log('Loading - ', isLoading)
+    console.log('QuizStarted - ', isQuizStart);
+    console.log('Data - ', quizData)
+    console.log('Question', Question)
+    console.log('Options', options)
+    console.log('Default Answers', DefaultAnswersData);
+  }, [quizData, Question, isLoading, status, isQuizStart, options, DefaultAnswersData])
   // SubmitCorrectAnswerFunc
-  const submitCorrectAnswer = (ans, id) => {}
+  const submitCorrectAnswer = (ans, id) => {
+    const matchedAnswers = [...DefaultAnswersData]
+    if(ans === Question.correct_answer){
+      dispatch(DefaultAnswersData[crrIndex] = 'correct')
+    }
+  }
+  
   // AskAiHandlerfunc
-  const askForAi = () => {}
+  const askForAi = () => { }
 
   return (
     <>
@@ -38,13 +76,47 @@ const QuizzCard = () => {
               {/* header */}
               <header className='flex justify-between items-center'>
                 <h1 className='text-purple-700 text-xl font-semibold  font-sans  py-1 px-2'>Quiz Navigator</h1>
-                {/* <p className='text-gray-200 pr-10'><span>{crrIndex + 1}</span> of {quizData.length} Questions</p> */}
+                <p className='text-gray-200 pr-10'><span>{crrIndex + 1}</span> of {quizData.length} Questions</p>
               </header>
               {/* quiz navigator */}
               <div className="quizNumbers min-w-[200px] max-w-fit flex overflow-x-scroll md:overflow-auto [&::-webkit-scrollbar]:h-[4px] [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:cursor-pointer px-1 mx-2 py-2 text-gray-200">
                 {/* Pending Display QuizNavigator */}
                 <ul className='flex items-center  gap-4'>
-
+                  {
+                    quizData.map((q, idx) => {
+                      let style = ' border rounded-lg w-10 h-10  flex justify-center items-center transition-all duration-200 text-gray-100 font-semibold cursor-pointer '
+                      // if (answerStatus[idx] === 'correct') {
+                      //   if (idx === crrIndex) {
+                      //     style += 'border-green-600 bg-green-950 scale-105'
+                      //   } else {
+                      //     style += 'border-green-600 bg-green-950'
+                      //   }
+                      // } else if (answerStatus[idx] === 'wrong') {
+                      //   if (idx === crrIndex) {
+                      //     style += 'border-red-600 bg-red-950 scale-105'
+                      //   } else {
+                      //     style += 'border-red-600 bg-red-950 '
+                      //   }
+                      // } else if (answerStatus[idx] === 'skipped') {
+                      //   if (idx === crrIndex) {
+                      //     style += 'border-yellow-600 bg-yellow-950 scale-115'
+                      //   } else {
+                      //     style += 'border-yellow-600 bg-yellow-950 '
+                      //   }
+                      // } else if (idx === crrIndex) {
+                      //   style += 'border-blue-800 bg-gray-900 scale-115'
+                      // } else {
+                      //   style += 'border-gray-800 '
+                      // }
+                      return <li
+                        onClick={() => findQuestionWithIndex(idx)}
+                        key={idx}
+                        className={style}
+                      >
+                        {idx + 1}
+                      </li>
+                    })
+                  }
                 </ul>
               </div>
               {/* about Answer */}
@@ -69,7 +141,8 @@ const QuizzCard = () => {
               </div>
               {/* Question */}
               <div className=' flex justify-between items-center py-0 mt-4 gap-2'>
-                {/* <p className=' flex justify-center items-center px-4 text-lg md:text-2xl text-gray-300 font-bold '>{Question.question}</p> */}
+                <p className=' flex justify-center items-center px-4 text-lg md:text-2xl text-gray-300 font-bold '>{Question.question}</p>
+                {/* Timer */}
                 <div className='flex justify-center items-center gap-2 px-4 border border-gray-700 rounded-md py-2'>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" width="25" height="22" fill='white'><g id="stopwatch"><path className="cls-1" d="m19.83 8.46 1.25-1.53a.78.78 0 0 0 .19-.6.8.8 0 0 0-.3-.56l-1-.85a.79.79 0 0 0-.6-.19.8.8 0 0 0-.56.3l-1.2 1.45A9.35 9.35 0 0 0 14 5.13V4h1.17a.83.83 0 0 0 .83-.83V1.83a.83.83 0 0 0-.83-.83H9.83a.83.83 0 0 0-.83.83v1.34a.83.83 0 0 0 .83.83H11v1.13a9.45 9.45 0 0 0-3.78 1.48L5.93 5a.84.84 0 0 0-1.17-.11l-1 .84a.84.84 0 0 0-.12 1.17L5 8.59v.05a9.49 9.49 0 1 0 14.79-.18zm-.4-2.66.77.63-1.06 1.29a9.56 9.56 0 0 0-.75-.66zM10 2h5v1h-5zm2 2h1v1h-1zM4.49 6.43l.78-.63 1.15 1.41a9.33 9.33 0 0 0-.73.68zM12.5 23a8.5 8.5 0 1 1 8.5-8.5 8.51 8.51 0 0 1-8.5 8.5z" /><path className="cls-1" d="M13 14.29V9.5a.5.5 0 0 0-1 0v5a.47.47 0 0 0 .15.35l4 4a.48.48 0 0 0 .7 0 .48.48 0 0 0 0-.7z" /></g></svg>
                   <h1 className='text-[15px] '>
@@ -80,36 +153,61 @@ const QuizzCard = () => {
               {/*Pending Options */}
               <div className="options mt-3">
                 <ul className='p-3'>
+                  {
+                    options.map((choice, id) => {
+                      let style =
+                        " px-4 py-2 sm:px-4 sm:py-3 border border-gray-700 rounded-lg   mb-2 cursor-pointer transition-all ";
+                      // let selectedAns = userAnswers[crrIndex]
+                      // if (selectedAns) {
+                      //   if (choice === Question.correct_answer) {
+                      //     style += 'bg-green-950 border-green-500 text-gray-200'
+                      //   } else if (choice === selectedAns) {
+                      //     style += 'bg-red-950 border-red-500 text-gray-200'
+                      //   }
+                      // } else {
+                      //   style += 'hover:border-gray-500'
+                      // }
+                      return (
+                        <li
+                          key={id}
+                        onClick={() => submitCorrectAnswer(choice, id)}
+                        className={style}
+                        >
+                          {choice}
+                        </li>
+                      );
+                    })
+                  }
                 </ul>
               </div>
 
               {/* buttons */}
               <div className="buttons  gap-6 py-1 mx-3  sm:flex justify-between items-center">
-                  {/* previousBtn */}
-                  <button
-                    onClick={PrevQuestion}
-                    className={`border border-gray-600 hover:border-gray-500 transition-all duration-300 cursor-pointer text-gray-100 bg-gray-900 hover:bg-gray-800 font-semibold mr-3 my-2   px-8 py-2 rounded-md`}
-                  >
-                    Previous
-                  </button>
-                  {/* SkipBtn */}
-                  <button
-                    onClick={skipQuestion}
-                    // disabled={userAnswers[crrIndex]}
-                    // ${userAnswers[crrIndex] ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-blue-800'}
-                    className={`px-10 right-0 py-2  rounded-md bg-blue-950  transition-all duration-300 text-gray-100  font-semibold mr-3 my-2 border border-blue-500 `}
-                  >
-                    Skip & Next
-                  </button>
-                  {/* NextBtn */}
-                  <button
-                    onClick={nextQuestion}
-                    // disabled={!userAnswers[crrIndex]}
-                    // ${!userAnswers[crrIndex] ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-orange-800 '}
-                    className={`px-10 right-0  py-2  rounded-md bg-orange-950 transition-all duration-300 text-gray-100  font-semibold mr-3 my-2 border border-orange-500`}
-                  >
-                    Save & Next
-                  </button>
+                {/* previousBtn */}
+                <button
+                  onClick={PrevQuestion}
+                  className={`border border-gray-600 hover:border-gray-500 transition-all duration-300 cursor-pointer text-gray-100 bg-gray-900 hover:bg-gray-800 font-semibold mr-3 my-2   px-8 py-2 rounded-md`}
+                >
+                  Previous
+                </button>
+                {/* SkipBtn */}
+                <button
+                  onClick={skipQuestion}
+                  // disabled={userAnswers[crrIndex]}
+                  // ${userAnswers[crrIndex] ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-blue-800'}
+                  className={`px-10 right-0 py-2  rounded-md bg-blue-950  transition-all duration-300 text-gray-100  font-semibold mr-3 my-2 border border-blue-500 `}
+                >
+                  Skip & Next
+                </button>
+                {/* NextBtn */}
+                <button
+                  onClick={nextQuestion}
+                  // disabled={!userAnswers[crrIndex]}
+                  // ${!userAnswers[crrIndex] ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-orange-800 '}
+                  className={`px-10 right-0  py-2  rounded-md bg-orange-950 transition-all duration-300 text-gray-100  font-semibold mr-3 my-2 border border-orange-500`}
+                >
+                  Save & Next
+                </button>
               </div>
             </div>
 
@@ -164,65 +262,6 @@ export default QuizzCard
 
 
 // list for options
-// {
-//   options.map((choice, id) => {
-//     let style =
-//       " px-4 py-2 sm:px-4 sm:py-3 border border-gray-700 rounded-lg   mb-2 cursor-pointer transition-all ";
-//     let selectedAns = userAnswers[crrIndex]
-//     if (selectedAns) {
-//       if (choice === Question.correct_answer) {
-//         style += 'bg-green-950 border-green-500 text-gray-200'
-//       } else if (choice === selectedAns) {
-//         style += 'bg-red-950 border-red-500 text-gray-200'
-//       }
-//     } else {
-//       style += 'hover:border-gray-500'
-//     }
-//     return (
-//       <li
-//         key={id}
-//         onClick={() => submitCorrectAnswer(choice, id)}
-//         className={style}
-//       >
-//         {choice}
-//       </li>
-//     );
-//   })
-// }
+
 
 // QuizNavigator
-// {
-//   quizData.map((q, idx) => {
-//     let style = ' border rounded-lg w-10 h-10  flex justify-center items-center transition-all duration-200 text-gray-100 font-semibold cursor-pointer '
-//     if (answerStatus[idx] === 'correct') {
-//       if (idx === crrIndex) {
-//         style += 'border-green-600 bg-green-950 scale-105'
-//       } else {
-//         style += 'border-green-600 bg-green-950'
-//       }
-//     } else if (answerStatus[idx] === 'wrong') {
-//       if (idx === crrIndex) {
-//         style += 'border-red-600 bg-red-950 scale-105'
-//       } else {
-//         style += 'border-red-600 bg-red-950 '
-//       }
-//     } else if (answerStatus[idx] === 'skipped') {
-//       if (idx === crrIndex) {
-//         style += 'border-yellow-600 bg-yellow-950 scale-115'
-//       } else {
-//         style += 'border-yellow-600 bg-yellow-950 '
-//       }
-//     } else if (idx === crrIndex) {
-//       style += 'border-blue-800 bg-gray-900 scale-115'
-//     } else {
-//       style += 'border-gray-800 '
-//     }
-//     return <li
-//       onClick={() => findQuestionWithIndex(idx)}
-//       key={idx}
-//       className={style}
-//     >
-//       {idx + 1}
-//     </li>
-//   })
-// }
