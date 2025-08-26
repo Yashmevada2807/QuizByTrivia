@@ -37,6 +37,7 @@ const QuizzCard = () => {
       console.log('Total Score - ', score);
     }
   }
+
   // PrevQuestionFunc
   const PrevQuestion = () => {
     if (crrIndex === 0) {
@@ -45,15 +46,18 @@ const QuizzCard = () => {
       dispatch(setDecrementCrrIndex())
     }
   }
+
   // findQuestionWithIndexFunc
   const findQuestionWithIndex = (index) => {
     dispatch(setCrrIndex(index))
-    
   }
+
   // StartTimerFunc
   const startTimer = (qIndex) => { }
+
   // StopTimerFunc
   const stopTimer = (qIndex) => { }
+
   // Progress tracker
   // useEffect(() => {
   //   console.log('Status - ', status)
@@ -66,7 +70,9 @@ const QuizzCard = () => {
   //   console.log('UserAnsStatus - ', answerStatus);
   //   console.log('UserAnsStatus - ', percentage);
   // }, [quizData, Question, isLoading, status, isQuizStart, options, userAnswers, answerStatus, percentage])
+
   // SubmitCorrectAnswerFunc
+
   const submitCorrectAnswer = (ans, id) => {
     // prevent overwrite if already answered
     if (userAnswers[id] !== null) return;
