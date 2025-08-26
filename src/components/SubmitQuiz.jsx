@@ -1,11 +1,20 @@
 import React, { useContext } from 'react'
 import { quizDataContext } from '../ContextApi'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { setIsSubmitQuiz, setUserAnswer, setAnswerStatus, setCrrIndex, resetQuiz } from '../features/quizz/quizzSlice'
 const SubmitQuiz = () => {
 
-    const tryAgain = () => {}
+    const {quizData, score, crrIndex, correctAnswer, incorrectAnswer, isSubmitQuiz, isQuizStart,isLoading} = useSelector(s => s.quiz)
+    const dispatch = useDispatch()
+
+
+    const tryAgain = () => {
+        dispatch(resetQuiz())
+    }
     
-    const backToMenu = () => {}
+    const backToMenu = () => {
+
+    }
     return (
         <div className='w-[1020px] h-[690px] bg-gray-800'>
             <div className="heading w-full border border-b-gray-700 flex justify-center items-center">
@@ -15,7 +24,7 @@ const SubmitQuiz = () => {
             </div>
             <div className="scoreCard flex flex-col justify-center items-center my-4">
                 <h1 className='flex justify-center items-center text-6xl text-gray-200 py-3'>Total Score</h1>
-                {/* <h1 className={` flex justify-center pt-9 items-center  text-4xl text-gray-200`}><span className={` mr-2`}>{score} </span> Out of {quizData.length}</h1> */}
+                <h1 className={` flex justify-center pt-9 items-center  text-4xl text-gray-200`}><span className={` mr-2`}>{score} </span> Out of {quizData.length}</h1>
                 {
                     score < 4 ? (
                         <p className={`py-4 text-red-500 text-lg font-semibold`}>
@@ -28,8 +37,8 @@ const SubmitQuiz = () => {
                     )
                 }
                 <div className='rounded-2xl bg-gray-900 min-w-[200px] w-[600px] max-w-[1000px]  py-7 flex flex-col justify-start items-center'>
-                    {/* <h1 className='mb-2 px-2 py-1 text-lg text-green-500 font-semibold'>Correct Answers - <span>{correctAnswer}</span></h1> */}
-                    {/* <h1 className='mb-2 px-2 py-1 text-lg text-red-600 font-semibold'>Wrong Answers - <span>{wrongAnswer}</span></h1> */}
+                    <h1 className='mb-2 px-2 py-1 text-lg text-green-500 font-semibold'>Correct Answers - <span>{correctAnswer}</span></h1>
+                    <h1 className='mb-2 px-2 py-1 text-lg text-red-600 font-semibold'>Wrong Answers - <span>{incorrectAnswer}</span></h1>
                     {/* <h1 className='mb-2 px-2 py-1 text-lg text-gray-400 font-semibold'>Skiped Answers - <span>{skipedAnswer}</span></h1> */}
                 </div>
             </div>
