@@ -13,7 +13,7 @@ const UserChoice = () => {
         console.log('Loading - ', isLoading)
         console.log('QuizStarted - ', isQuizStart);
     }, [quizData, isLoading, status, isQuizStart])
-    
+
     const handleChange = (e) => {
         const { name, value } = e.target
         dispatch(setFormData({ name, value }))
@@ -25,7 +25,7 @@ const UserChoice = () => {
     }
 
     return (
-        <div className=' min-w-[300px] w-[700px] max-w-[780px] rounded-lg px-4 py-4 bg-gray-800'>
+        <div className=' min-w-[260px] m-2 w-[700px] max-w-[780px] rounded-lg px-4 py-4 bg-gray-800'>
             <h1 className='px-5 flex justify-center py-4 text-white items-center text-2xl font-semibold'> Welcome to TriviaQuizz</h1>
             {/* SubmitQuizDataForm */}
             <form onSubmit={handleSubmit} className='w-full py-6'>
