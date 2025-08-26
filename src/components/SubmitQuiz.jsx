@@ -1,19 +1,18 @@
 import React, { useContext } from 'react'
 import { quizDataContext } from '../ContextApi'
 import { useDispatch, useSelector } from 'react-redux'
-import { setIsSubmitQuiz, setUserAnswer, setAnswerStatus, setCrrIndex, resetQuiz } from '../features/quizz/quizzSlice'
+import { resetQuiz, backToMainMenu } from '../features/quizz/quizzSlice'
 const SubmitQuiz = () => {
 
     const {quizData, score, crrIndex, correctAnswer, incorrectAnswer, isSubmitQuiz, isQuizStart,isLoading} = useSelector(s => s.quiz)
     const dispatch = useDispatch()
-
 
     const tryAgain = () => {
         dispatch(resetQuiz())
     }
     
     const backToMenu = () => {
-
+        dispatch(backToMainMenu())
     }
     return (
         <div className='w-[1020px] h-[690px] bg-gray-800'>
@@ -39,7 +38,7 @@ const SubmitQuiz = () => {
                 <div className='rounded-2xl bg-gray-900 min-w-[200px] w-[600px] max-w-[1000px]  py-7 flex flex-col justify-start items-center'>
                     <h1 className='mb-2 px-2 py-1 text-lg text-green-500 font-semibold'>Correct Answers - <span>{correctAnswer}</span></h1>
                     <h1 className='mb-2 px-2 py-1 text-lg text-red-600 font-semibold'>Wrong Answers - <span>{incorrectAnswer}</span></h1>
-                    {/* <h1 className='mb-2 px-2 py-1 text-lg text-gray-400 font-semibold'>Skiped Answers - <span>{skipedAnswer}</span></h1> */}
+                    {/* <h1 className='mb-2 px-2 py-1 text-lg text-gray-400 font-semibold'>Skiped Answers - <span>{skipedAnswer}</span></h1>  */}
                 </div>
             </div>
             <div className="button w-full mt-20 flex justify-center items-center gap-4">
