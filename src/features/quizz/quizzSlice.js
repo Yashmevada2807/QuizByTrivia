@@ -49,7 +49,9 @@ export const quizSlice = createSlice({
         setIncorrectAnswer: (state) => {
             state.score === 0
         },
-        setSkippedAnswer: (state) => state.skippedAnswer += 1,
+        setSkippedAnswer: (state) =>{ 
+            state.skippedAnswer += 1
+        },
         setCrrIndex: (state, action) => {
             state.crrIndex = action.payload
         },
@@ -59,7 +61,9 @@ export const quizSlice = createSlice({
         setDecrementCrrIndex: (state) => {
             state.crrIndex -= 1
         },
-        setQuestionInterval: (state, action) => { },
+        setQuestionInterval: (state, action) => {
+
+        },
         setUserAnswer: (state, action) => {
             const { index, answer } = action.payload
             state.userAnswers[index] = answer
@@ -74,9 +78,19 @@ export const quizSlice = createSlice({
         setIsSubmitQuiz : (state, action) => {
             state.isSubmitQuiz = action.payload
         },
-        resetQuiz : (state, action) => {
+        resetQuiz : (state) => {
             const n = state.quizData.length
             state.isQuizStart = true
+            state.userAnswers = Array(n).fill(null)
+            state.answerStatus = Array(n).fill(null)
+            state.isSubmitQuiz = false
+            state.score = 0
+            state.crrIndex = 0
+            state.isAskAI = false
+        },
+        backToMainMenu : (state) => {
+            const n = state.quizData.length
+            state.isQuizStart = false
             state.userAnswers = Array(n).fill(null)
             state.answerStatus = Array(n).fill(null)
             state.isSubmitQuiz = false
@@ -107,6 +121,6 @@ export const quizSlice = createSlice({
     }
 })
 
-export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz } = quizSlice.actions
+export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz, backToMainMenu } = quizSlice.actions
 
 export const quizReducer = quizSlice.reducer
