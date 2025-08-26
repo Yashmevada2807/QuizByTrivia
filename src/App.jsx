@@ -10,13 +10,16 @@ import SubmitModal from './components/SubmitModal'
 import { useSelector } from 'react-redux'
 
 function App() {
-  const {isQuizStart} = useSelector(s => s.quiz)
+  const { isQuizStart, isSubmitQuiz } = useSelector(s => s.quiz)
   return (
     <>
       <div className=' w-full min-h-screen flex justify-center items-center bg-gray-900'>
         {
-          isQuizStart ?
-             <QuizzCard/> : <UserChoice/> 
+          isQuizStart ? (  
+            isSubmitQuiz ? <SubmitQuiz/> : <QuizzCard /> 
+          ) : (
+            <UserChoice />
+          )
         }
       </div>
     </>
