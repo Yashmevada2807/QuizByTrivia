@@ -31,35 +31,58 @@ export const quizSlice = createSlice({
         questionInterval: {},
         isModal: false,
         isSubmitQuiz: false,
+        isAskAI : false,
         isQuizStart: false,
-        userAnswers: []
-        // Array(quizData.length).fill(null)
+        userAnswers: [],
+        answerStatus: []
     },
     reducers: {
         setFormData: (state, action) => {
-            const {name, value} = action.payload
+            const { name, value } = action.payload
             state.formData[name] = value
             state.formData[name] = value
             state.formData[name] = value
         },
-        setScore: (state) => state.score += 1,
         setCorrectAnswer: (state) => {
-            state.correctAnswer += 1
+            state.score += 1
         },
-        setIncorrectAnswer: (state) => state.incorrectAnswer += 1,
+        setIncorrectAnswer: (state) => {
+            state.score === 0
+        },
         setSkippedAnswer: (state) => state.skippedAnswer += 1,
-        setCrrIndex : (state, action) => {
+        setCrrIndex: (state, action) => {
             state.crrIndex = action.payload
         },
         setIncrementCrrIndex: (state) => {
             state.crrIndex += 1
         },
-        setDecrementCrrIndex:(state) => {
+        setDecrementCrrIndex: (state) => {
             state.crrIndex -= 1
         },
         setQuestionInterval: (state, action) => { },
         setUserAnswer: (state, action) => {
-            state.userAnswers = action.payload
+            const { index, answer } = action.payload
+            state.userAnswers[index] = answer
+        },
+        setAnswerStatus: (state, action) => {
+            const { index, status } = action.payload
+            state.answerStatus[index] = status
+        },
+        setIsAskAi: (state, action) => {
+            state.isAskAI = action.payload
+        },
+        setIsSubmitQuiz : (state, action) => {
+            state.isSubmitQuiz = action.payload
+        },
+        resetQuiz : (state, action) => {
+            const n = state.quizData.length
+            state.isQuizStart = true
+            state.userAnswers = Array(n).fill(null)
+            state.answerStatus = Array(n).fill(null)
+            state.isSubmitQuiz = false
+            state.score = 0
+            state.crrIndex = 0
+            state.isAskAI = false
         }
     },
     extraReducers: (builder) => {
@@ -73,6 +96,8 @@ export const quizSlice = createSlice({
                 state.status = 'success'
                 state.quizData = action.payload.results
                 state.isQuizStart = true
+                state.userAnswers = Array(action.payload.results.length).fill(null)
+                state.answerStatus = Array(action.payload.results.length).fill(null)
             })
             .addCase(fetchedQuizData.rejected, (state, action) => {
                 state.errors = action.error?.message || 'Something went wrong'
@@ -82,6 +107,6 @@ export const quizSlice = createSlice({
     }
 })
 
-export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer } = quizSlice.actions
+export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz } = quizSlice.actions
 
 export const quizReducer = quizSlice.reducer
