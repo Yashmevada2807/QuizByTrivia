@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { quizDataContext } from '../ContextApi'
 import { useDispatch, useSelector } from 'react-redux'
-import { resetQuiz, backToMainMenu } from '../features/quizz/quizzSlice'
+import { resetQuiz, backToMainMenu, resetTimer } from '../features/quizz/quizzSlice'
 const SubmitQuiz = () => {
 
     const {quizData, score, crrIndex, correctAnswer, incorrectAnswer, isSubmitQuiz, isQuizStart,isLoading} = useSelector(s => s.quiz)
@@ -9,10 +9,12 @@ const SubmitQuiz = () => {
 
     const tryAgain = () => {
         dispatch(resetQuiz())
+        dispatch(resetTimer())
     }
     
     const backToMenu = () => {
         dispatch(backToMainMenu())
+        dispatch(resetTimer())
     }
     return (
         <div className='w-[1020px] h-[690px] bg-gray-800'>
