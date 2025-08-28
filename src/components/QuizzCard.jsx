@@ -4,21 +4,57 @@ import LuminaAiChatBot from './LuminaAiChatBot'
 import { toast, Bounce } from 'react-toastify'
 import SubmitModalCard from './SubmitModalCard'
 import { useDispatch, useSelector } from 'react-redux'
-import { setIncrementCrrIndex, setDecrementCrrIndex, setCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz } from '../features/quizz/quizzSlice'
+import { setIncrementCrrIndex, setDecrementCrrIndex, setCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, setStopTimer, setStartTimer, setIncrementTimer, resetQuizOnReload, setisModal } from '../features/quizz/quizzSlice'
 
 const QuizzCard = () => {
 
-  const { isQuizStart, isLoading, status, isAskAI, quizData, crrIndex, userAnswers, answerStatus, score } = useSelector(s => s.quiz)
+  const { isQuizStart, isLoading, status, isModal, isAskAI, quizData, userAnswers, answerStatus, score, questionTimer, questionInterval } = useSelector(s => s.quiz)
   const dispatch = useDispatch()
+  const crrIndex = useSelector((state) => state.quiz.crrIndex);
 
   const Question = quizData[crrIndex]
-  const options = [Question.correct_answer, ...Question.incorrect_answers]
+  const suffleOptions = useMemo(() => {
+    const options = [Question.correct_answer, ...Question.incorrect_answers].sort(() => Math.random() - 0.5)
+    return options
+  }, [Question])
 
   const answeredCount = answerStatus.filter(
     (status) => status === "correct" || status === "incorrect"
   ).length;
 
   const progress = (answeredCount / quizData.length) * 100;
+  // timer tracker
+  const formatTime = (totalSeconds) => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  let result = "";
+  if (hours > 0) result += `${hours} hr `;
+  if (minutes > 0) result += `${minutes} min `;
+  result += `${seconds} sec`;
+
+  return result.trim();
+};
+
+  useEffect(() => {
+    const entries = performance.getEntriesByType('navigation')
+    const isReload = entries.length > 0 && entries[0].type === 'reload'
+    if (quizData?.length > 0) {
+      if (isReload) {
+        Object.values(questionInterval).forEach((id) => clearInterval(id));
+        dispatch(resetQuizOnReload())
+      } else {
+        handlestartTimer(0)
+      }
+    }
+  }, [quizData, dispatch])
+
+  useEffect(() => {
+    if (quizData.length > 0 && crrIndex === 0) {
+      handlestartTimer(0); // start fresh timer once reset brings index back to 0
+    }
+  }, [quizData, crrIndex]);
 
 
   const skipQuestion = () => {
@@ -28,11 +64,15 @@ const QuizzCard = () => {
 
   // NextQuestionFunc
   const nextQuestion = () => {
-    if (crrIndex < quizData.length - 1) {
+    const nextIndex = crrIndex + 1
+    if (nextIndex < quizData.length) {
       dispatch(setIncrementCrrIndex())
       dispatch(setIsAskAi(false))
+      if (!questionInterval[nextIndex]) {
+        handlestartTimer(nextIndex)
+      }
     } else {
-      dispatch(setIsSubmitQuiz(true))
+      dispatch(setisModal(true))
       console.log('No more questions');
       console.log('Total Score - ', score);
     }
@@ -50,26 +90,27 @@ const QuizzCard = () => {
   // findQuestionWithIndexFunc
   const findQuestionWithIndex = (index) => {
     dispatch(setCrrIndex(index))
+    if (!questionInterval[index]) {
+      handlestartTimer(index)
+    }
   }
 
   // StartTimerFunc
-  const startTimer = (qIndex) => { }
+  const handlestartTimer = (qIndex) => {
+    if (!questionInterval[qIndex]) {
+      const intervalId = setInterval(() => {
+        dispatch(setIncrementTimer(qIndex))
+      }, 1000);
+      dispatch(setStartTimer({ index: qIndex, intervalId }))
+    }
+  }
 
   // StopTimerFunc
-  const stopTimer = (qIndex) => { }
+  const handlestopTimer = (qIndex) => {
+    dispatch(setStopTimer(qIndex))
+  }
 
-  // Progress tracker
-  // useEffect(() => {
-  //   console.log('Status - ', status)
-  //   console.log('Loading - ', isLoading)
-  //   console.log('QuizStarted - ', isQuizStart);
-  //   console.log('Data - ', quizData)
-  //   console.log('Question - ', Question)
-  //   console.log('Options - ', options)
-  //   console.log('userAnswer - ', userAnswers);
-  //   console.log('UserAnsStatus - ', answerStatus);
-  //   console.log('UserAnsStatus - ', percentage);
-  // }, [quizData, Question, isLoading, status, isQuizStart, options, userAnswers, answerStatus, percentage])
+
 
   // SubmitCorrectAnswerFunc
 
@@ -83,7 +124,7 @@ const QuizzCard = () => {
       dispatch(setAnswerStatus({ index: id, status: 'incorrect' }));
       dispatch(setIncorrectAnswer())
     }
-    
+    handlestopTimer(id)
     dispatch(setIsAskAi(true))
     // store the chosen answer at that index
     dispatch(setUserAnswer({ index: id, answer: ans }));
@@ -180,18 +221,20 @@ const QuizzCard = () => {
                 <p className=' flex justify-center items-center px-4 text-lg md:text-2xl text-gray-300 font-bold '>{Question.question}</p>
                 {/* Timer */}
                 <div className='flex justify-center items-center gap-2 px-4 border border-gray-700 rounded-md py-2'>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" width="25" height="22" fill='white'><g id="stopwatch"><path className="cls-1" d="m19.83 8.46 1.25-1.53a.78.78 0 0 0 .19-.6.8.8 0 0 0-.3-.56l-1-.85a.79.79 0 0 0-.6-.19.8.8 0 0 0-.56.3l-1.2 1.45A9.35 9.35 0 0 0 14 5.13V4h1.17a.83.83 0 0 0 .83-.83V1.83a.83.83 0 0 0-.83-.83H9.83a.83.83 0 0 0-.83.83v1.34a.83.83 0 0 0 .83.83H11v1.13a9.45 9.45 0 0 0-3.78 1.48L5.93 5a.84.84 0 0 0-1.17-.11l-1 .84a.84.84 0 0 0-.12 1.17L5 8.59v.05a9.49 9.49 0 1 0 14.79-.18zm-.4-2.66.77.63-1.06 1.29a9.56 9.56 0 0 0-.75-.66zM10 2h5v1h-5zm2 2h1v1h-1zM4.49 6.43l.78-.63 1.15 1.41a9.33 9.33 0 0 0-.73.68zM12.5 23a8.5 8.5 0 1 1 8.5-8.5 8.51 8.51 0 0 1-8.5 8.5z" /><path className="cls-1" d="M13 14.29V9.5a.5.5 0 0 0-1 0v5a.47.47 0 0 0 .15.35l4 4a.48.48 0 0 0 .7 0 .48.48 0 0 0 0-.7z" /></g></svg>
+                  <div className='w-6 h-7 md:w-6 md:h-8 flex justify-center items-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"  fill='white'><g id="stopwatch"><path className="cls-1" d="m19.83 8.46 1.25-1.53a.78.78 0 0 0 .19-.6.8.8 0 0 0-.3-.56l-1-.85a.79.79 0 0 0-.6-.19.8.8 0 0 0-.56.3l-1.2 1.45A9.35 9.35 0 0 0 14 5.13V4h1.17a.83.83 0 0 0 .83-.83V1.83a.83.83 0 0 0-.83-.83H9.83a.83.83 0 0 0-.83.83v1.34a.83.83 0 0 0 .83.83H11v1.13a9.45 9.45 0 0 0-3.78 1.48L5.93 5a.84.84 0 0 0-1.17-.11l-1 .84a.84.84 0 0 0-.12 1.17L5 8.59v.05a9.49 9.49 0 1 0 14.79-.18zm-.4-2.66.77.63-1.06 1.29a9.56 9.56 0 0 0-.75-.66zM10 2h5v1h-5zm2 2h1v1h-1zM4.49 6.43l.78-.63 1.15 1.41a9.33 9.33 0 0 0-.73.68zM12.5 23a8.5 8.5 0 1 1 8.5-8.5 8.51 8.51 0 0 1-8.5 8.5z" /><path className="cls-1" d="M13 14.29V9.5a.5.5 0 0 0-1 0v5a.47.47 0 0 0 .15.35l4 4a.48.48 0 0 0 .7 0 .48.48 0 0 0 0-.7z" /></g></svg>
+                  </div>
                   <h1 className='text-[15px] '>
-                    {/* <span>{crrquestionTimer[crrIndex] || 1} seconds </span> */}
+                    {formatTime(questionTimer[crrIndex] || 1)}
                   </h1>
                 </div>
               </div>
 
-              {/*Pending Options */}
+              {/*Options */}
               <div className="options mt-3">
                 <ul className='p-3'>
                   {
-                    options.map((choice, id) => {
+                    suffleOptions.map((choice, id) => {
                       let style =
                         " px-4 py-2 sm:px-4 sm:py-3 border border-gray-700 rounded-lg   mb-2 cursor-pointer transition-all ";
                       let selectedAns = userAnswers[crrIndex]
@@ -262,7 +305,7 @@ const QuizzCard = () => {
                       className={`progress bg-green-700 text-xs transition-all duration-400  text-blue-100 font-bold text-center p-1 leading-none rounded-full`}
                       style={{ width: `${progress}%` }}
                     >
-                      <h1>{progress}%</h1>
+                      <h1>{progress.toFixed(2)}%</h1>
                     </div>
                   </div>
                 </div>
@@ -281,19 +324,19 @@ const QuizzCard = () => {
 
               {/* LuminaAI card */}
               {
-                isAskAI ? <div className={`progressBar ${ isAskAI ? 'opacity-100 transition-opacity duration-300' : 'opacity-0'} border mb-3 border-purple-700 bg-gradient-to-r from-pink-800 via-purple-800 to-blue-800 rounded-xl p-2`}>
-                <h1 className=' flex justify-center items-center text-3xl font-sans'>Ask With AI</h1>
-                <p className='flex justify-center items-center text-gray-300 text-sm py-2'>Search with LuminaAI</p>
-                <div className='flex justify-center py-1 items-center'>
-                  <button className =' bg-gradient-to-br from-blue-600 via-violet-600  to-purple-600  hover:scale-105 transition-all duration-300 cursor-pointer text-2xl rounded-md px-4 py-2'>
-                  <h1 className='text-gray-100'>LuminaAI</h1>
-                </button>
-                </div>
-              </div> : null
+                isAskAI ? <div className={`progressBar ${isAskAI ? 'opacity-100 transition-opacity duration-300' : 'opacity-0'} border mb-3 border-purple-700 bg-gradient-to-r from-pink-800 via-purple-800 to-blue-800 rounded-xl p-2`}>
+                  <h1 className=' flex justify-center items-center text-3xl font-sans'>Ask With AI</h1>
+                  <p className='flex justify-center items-center text-gray-300 text-sm py-2'>Search with LuminaAI</p>
+                  <div className='flex justify-center py-1 items-center'>
+                    <button className=' bg-gradient-to-br from-blue-600 via-violet-600  to-purple-600  hover:scale-105 transition-all duration-300 cursor-pointer text-2xl rounded-md px-4 py-2'>
+                      <h1 className='text-gray-100'>LuminaAI</h1>
+                    </button>
+                  </div>
+                </div> : null
               }
 
               {/* Submit Btn */}
-             {/* {
+              {/* {
               crrIndex === quizData.length - 1 ?  <div className=' flex justify-center items-center'>
                 <button className={`px-10 right-0  py-2 ${!userAnswers[crrIndex] ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-orange-800 '} rounded-md bg-orange-950 transition-all duration-300 text-gray-100  font-semibold mr-3 my-2 border border-orange-500`}>Submit</button>
               </div> : null
@@ -302,14 +345,14 @@ const QuizzCard = () => {
           </div>
         </div>
       </div>
-      {/* {
+      {
         isModal && (
           <SubmitModalCard
-            submitQuiz={onSubmit}
-            closeModal={() => setIsModal(false)}
+            submitQuiz={() => dispatch(setIsSubmitQuiz(true))}
+            closeModal={() => dispatch(setisModal(false))}
           />
         )
-      } */}
+      }
     </>
   )
 }
