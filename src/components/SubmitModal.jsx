@@ -1,14 +1,17 @@
 import React, { useContext, useState } from 'react'
 import SubmitModalCard from './SubmitModalCard'
 import { quizDataContext } from '../ContextApi'
+import { setIsSubmitQuiz } from '../features/quizz/quizzSlice'
 
 const SubmitModal = () => {
 
-    const { isModal, setIsModal } = useContext(quizDataContext)
+    const closeModal = () => {
+        setIsSubmitQuiz(false)
+    }
 
-    const closeModal = () => {}
-
-    const submitQuiz = () => {}
+    const submitQuiz = () => {
+        
+    }
 
     return (
         <>
