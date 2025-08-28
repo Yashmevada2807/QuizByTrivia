@@ -28,13 +28,15 @@ export const quizSlice = createSlice({
         incorrectAnswer: 0,
         skippedAnswer: 0,
         crrIndex: 0,
+        questionTimer: {},
         questionInterval: {},
         isModal: false,
         isSubmitQuiz: false,
         isAskAI : false,
         isQuizStart: false,
         userAnswers: [],
-        answerStatus: []
+        answerStatus: [],
+
     },
     reducers: {
         setFormData: (state, action) => {
@@ -61,9 +63,21 @@ export const quizSlice = createSlice({
         setDecrementCrrIndex: (state) => {
             state.crrIndex -= 1
         },
-        setQuestionInterval: (state, action) => {
-
+        setIncrementTimer:(state, action) => {
+            const index = action.payload
+            state.questionTimer[index] =(state.questionTimer[index] || 0) + 1
         },
+        setStartTimer: (state, action) => {
+            const {index, intervalId} = action.payload
+            state.questionInterval[index] = intervalId
+        },
+        setStopTimer: (state, action) => {
+            const index = action.payload
+            if(state.questionInterval[index]){
+                clearInterval(state.questionInterval[index])
+                delete state.questionInterval[index]
+            }
+         },
         setUserAnswer: (state, action) => {
             const { index, answer } = action.payload
             state.userAnswers[index] = answer
@@ -88,8 +102,14 @@ export const quizSlice = createSlice({
             state.crrIndex = 0
             state.isAskAI = false
         },
+        resetTimer : (state) => {
+            Object.values(state.questionInterval).forEach(id => clearInterval(id))
+            state.questionInterval = {}
+            state.questionTimer = {}
+        },
         backToMainMenu : (state) => {
             const n = state.quizData.length
+            state.quizData = []
             state.isQuizStart = false
             state.userAnswers = Array(n).fill(null)
             state.answerStatus = Array(n).fill(null)
@@ -121,6 +141,6 @@ export const quizSlice = createSlice({
     }
 })
 
-export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz, backToMainMenu } = quizSlice.actions
+export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz, backToMainMenu, setStopTimer, setStartTimer, setIncrementTimer } = quizSlice.actions
 
 export const quizReducer = quizSlice.reducer
