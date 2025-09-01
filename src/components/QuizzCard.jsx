@@ -4,11 +4,12 @@ import LuminaAiChatBot from './LuminaAiChatBot'
 import { toast, Bounce } from 'react-toastify'
 import SubmitModalCard from './SubmitModalCard'
 import { useDispatch, useSelector } from 'react-redux'
-import { setIncrementCrrIndex, setDecrementCrrIndex, setCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, setStopTimer, setStartTimer, setIncrementTimer, resetQuizOnReload, setisModal } from '../features/quizz/quizzSlice'
+import { setIncrementCrrIndex, setDecrementCrrIndex, setCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, setStopTimer, setStartTimer, setIncrementTimer, resetQuizOnReload, setisModal, toggleAiBot, setShowAiBot, backToMainMenu, setcancelQuizModal, tickTimer } from '../features/quizz/quizzSlice'
+import CancelModalCard from './CancelModalCard'
 
 const QuizzCard = () => {
 
-  const { isQuizStart, isLoading, status, isModal, isAskAI, quizData, userAnswers, answerStatus, score, questionTimer, questionInterval } = useSelector(s => s.quiz)
+  const { isQuizStart, isLoading, status, isModal, isAskAI, quizData, userAnswers, answerStatus, score, questionTimer, questionInterval, showAiBot, cancelQuizModal } = useSelector(s => s.quiz)
   const dispatch = useDispatch()
   const crrIndex = useSelector((state) => state.quiz.crrIndex);
 
@@ -25,17 +26,17 @@ const QuizzCard = () => {
   const progress = (answeredCount / quizData.length) * 100;
   // timer tracker
   const formatTime = (totalSeconds) => {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-  let result = "";
-  if (hours > 0) result += `${hours} hr `;
-  if (minutes > 0) result += `${minutes} min `;
-  result += `${seconds} sec`;
+    let result = "";
+    if (hours > 0) result += `${hours} hr `;
+    if (minutes > 0) result += `${minutes} min `;
+    result += `${seconds} sec`;
 
-  return result.trim();
-};
+    return result.trim();
+  };
 
   useEffect(() => {
     const entries = performance.getEntriesByType('navigation')
@@ -49,51 +50,6 @@ const QuizzCard = () => {
       }
     }
   }, [quizData, dispatch])
-
-  useEffect(() => {
-    if (quizData.length > 0 && crrIndex === 0) {
-      handlestartTimer(0); // start fresh timer once reset brings index back to 0
-    }
-  }, [quizData, crrIndex]);
-
-
-  const skipQuestion = () => {
-    dispatch(setAnswerStatus({ index: crrIndex, status: 'skipped' }))
-    dispatch(setIncrementCrrIndex())
-  }
-
-  // NextQuestionFunc
-  const nextQuestion = () => {
-    const nextIndex = crrIndex + 1
-    if (nextIndex < quizData.length) {
-      dispatch(setIncrementCrrIndex())
-      dispatch(setIsAskAi(false))
-      if (!questionInterval[nextIndex]) {
-        handlestartTimer(nextIndex)
-      }
-    } else {
-      dispatch(setisModal(true))
-      console.log('No more questions');
-      console.log('Total Score - ', score);
-    }
-  }
-
-  // PrevQuestionFunc
-  const PrevQuestion = () => {
-    if (crrIndex === 0) {
-      console.log('First Question');
-    } else {
-      dispatch(setDecrementCrrIndex())
-    }
-  }
-
-  // findQuestionWithIndexFunc
-  const findQuestionWithIndex = (index) => {
-    dispatch(setCrrIndex(index))
-    if (!questionInterval[index]) {
-      handlestartTimer(index)
-    }
-  }
 
   // StartTimerFunc
   const handlestartTimer = (qIndex) => {
@@ -110,10 +66,7 @@ const QuizzCard = () => {
     dispatch(setStopTimer(qIndex))
   }
 
-
-
   // SubmitCorrectAnswerFunc
-
   const submitCorrectAnswer = (ans, id) => {
     // prevent overwrite if already answered
     if (userAnswers[id] !== null) return;
@@ -131,7 +84,95 @@ const QuizzCard = () => {
   };
 
   // AskAiHandlerfunc
-  const askForAi = () => { }
+  const askForAi = () => {
+    dispatch(setShowAiBot(true))
+  }
+
+  const backToHome = () => {
+    dispatch(setcancelQuizModal(true))
+  }
+
+  // Skip Question
+const skipQuestion = () => {
+  if (crrIndex < quizData.length - 1) {
+    dispatch(setAnswerStatus({ index: crrIndex, status: "skipped" }));
+
+    // stop current timer
+    handlestopTimer(crrIndex);
+
+    // move next
+    const nextIndex = crrIndex + 1;
+    dispatch(setIncrementCrrIndex());
+
+    // start/resume next
+    if (!questionInterval[nextIndex]) {
+      handlestartTimer(nextIndex);
+    }
+  } else {
+    console.log("Last Question");
+  }
+};
+
+// NextQuestionFunc
+const nextQuestion = () => {
+  const nextIndex = crrIndex + 1;
+  if (nextIndex < quizData.length) {
+    // 1. Stop current question timer
+    handlestopTimer(crrIndex);
+
+    // 2. Move next
+    dispatch(setIncrementCrrIndex());
+    dispatch(setIsAskAi(false));
+
+    // 3. Start/resume timer for next
+    if (!questionInterval[nextIndex]) {
+      handlestartTimer(nextIndex);
+    }
+  } else {
+    dispatch(setisModal(true));
+    console.log("No more questions");
+    console.log("Total Score - ", score);
+  }
+};
+
+// PrevQuestionFunc
+const PrevQuestion = () => {
+  if (crrIndex === 0) {
+    console.log("First Question");
+    return;
+  }
+
+  // target index
+  const prevIndex = crrIndex - 1;
+
+  // 1) stop the current question's timer
+  handlestopTimer(crrIndex);
+
+  // 2) move to the previous question
+  dispatch(setDecrementCrrIndex());
+
+  // 3) start/resume the previous question's timer
+  if (!questionInterval[prevIndex]) {
+    handlestartTimer(prevIndex);
+  }
+};
+
+// findQuestionWithIndexFunc
+const findQuestionWithIndex = (index) => {
+  // 1. Stop current timer
+  handlestopTimer(crrIndex);
+
+  // 2. Move to clicked question
+  dispatch(setCrrIndex(index));
+
+  // 3. Resume/start that question timer
+  if (!questionInterval[index]) {
+    handlestartTimer(index);
+  }
+};
+
+
+
 
   return (
     <>
@@ -139,6 +180,11 @@ const QuizzCard = () => {
       <div className=' min-w-[300px] w-screen min-h-screen  flex px-4 bg-gray-900'>
         <div className="quizSection  w-full  sm:w-1/1  ">
           <h1 className='text-3xl bg-gradient-to-br from-blue-500 to-purple-500 text-transparent bg-clip-text  font-extrabold font-sans py-3'>TriviaQuiz</h1>
+          <div className="back  py-2">
+            <button onClick={backToHome} className='flex justify-center items-center gap-2 bg-black hover:bg-gray-800 transition-all duration-300 border border-gray-700 rounded-lg px-3 py-3 cursor-pointer text-gray-200 hover:text-blue-400 '>
+              &larr; Back to Home
+            </button>
+          </div>
 
           {/* Total Questions Navigator */}
           <div className=' py-2 mb-3 px-8 border-[0.5px] border-blue-950 rounded-2xl'>
@@ -208,7 +254,7 @@ const QuizzCard = () => {
           <div className=" w-full md:flex  md:gap-4">
 
             {/* left Side */}
-            <div className="quizBox w-full mb-2 md:w-[70%] border border-blue-950 rounded-lg overflow-hidden p-2 text-gray-200 ">
+            <div className="quizBox w-full mb-2 md:w-[75%] border border-blue-950 rounded-lg overflow-hidden p-2 text-gray-200 ">
 
               {/* information */}
               <div className=' flex justify-between items-center '>
@@ -217,14 +263,15 @@ const QuizzCard = () => {
               </div>
 
               {/* Question */}
-              <div className=' flex justify-between items-center py-0 mt-4 gap-2'>
-                <p className=' flex justify-center items-center px-4 text-lg md:text-2xl text-gray-300 font-bold '>{Question.question}</p>
+              <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center  py-2 px-2 mt-4 gap-3">
+                {/* Question text */}
+                <p className="flex-1 text-base sm:text-lg md:text-[22px] text-gray-300 font-bold px-4 break-words">
+                  {Question.question}
+                </p>
+
                 {/* Timer */}
-                <div className='flex justify-center items-center gap-2 px-4 border border-gray-700 rounded-md py-2'>
-                  <div className='w-6 h-7 md:w-6 md:h-8 flex justify-center items-center'>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"  fill='white'><g id="stopwatch"><path className="cls-1" d="m19.83 8.46 1.25-1.53a.78.78 0 0 0 .19-.6.8.8 0 0 0-.3-.56l-1-.85a.79.79 0 0 0-.6-.19.8.8 0 0 0-.56.3l-1.2 1.45A9.35 9.35 0 0 0 14 5.13V4h1.17a.83.83 0 0 0 .83-.83V1.83a.83.83 0 0 0-.83-.83H9.83a.83.83 0 0 0-.83.83v1.34a.83.83 0 0 0 .83.83H11v1.13a9.45 9.45 0 0 0-3.78 1.48L5.93 5a.84.84 0 0 0-1.17-.11l-1 .84a.84.84 0 0 0-.12 1.17L5 8.59v.05a9.49 9.49 0 1 0 14.79-.18zm-.4-2.66.77.63-1.06 1.29a9.56 9.56 0 0 0-.75-.66zM10 2h5v1h-5zm2 2h1v1h-1zM4.49 6.43l.78-.63 1.15 1.41a9.33 9.33 0 0 0-.73.68zM12.5 23a8.5 8.5 0 1 1 8.5-8.5 8.51 8.51 0 0 1-8.5 8.5z" /><path className="cls-1" d="M13 14.29V9.5a.5.5 0 0 0-1 0v5a.47.47 0 0 0 .15.35l4 4a.48.48 0 0 0 .7 0 .48.48 0 0 0 0-.7z" /></g></svg>
-                  </div>
-                  <h1 className='text-[15px] '>
+                <div className="sm:ml-auto flex justify-center items-center gap-2 px-3 sm:px-4 border border-gray-300 rounded-md py-1 sm:py-2">
+                  <h1 className="text-xs sm:text-sm md:text-base">
                     {formatTime(questionTimer[crrIndex] || 1)}
                   </h1>
                 </div>
@@ -292,7 +339,7 @@ const QuizzCard = () => {
             </div>
 
             {/* Right Side */}
-            <div className="md:w-[30%] border text-gray-200  px-4 py-3 border-blue-950 rounded-lg overflow-hidden">
+            <div className="md:w-[25%] border text-gray-200  px-4 py-3 border-blue-950 rounded-lg overflow-hidden">
 
               {/* Progress Card */}
               <div className="progressBar border mb-3 border-blue-700 bg-gradient-to-tl from-blue-950 to-blue-950 rounded-xl p-2">
@@ -323,33 +370,44 @@ const QuizzCard = () => {
               </div>
 
               {/* LuminaAI card */}
-              {
-                isAskAI ? <div className={`progressBar ${isAskAI ? 'opacity-100 transition-opacity duration-300' : 'opacity-0'} border mb-3 border-purple-700 bg-gradient-to-r from-pink-800 via-purple-800 to-blue-800 rounded-xl p-2`}>
-                  <h1 className=' flex justify-center items-center text-3xl font-sans'>Ask With AI</h1>
-                  <p className='flex justify-center items-center text-gray-300 text-sm py-2'>Search with LuminaAI</p>
-                  <div className='flex justify-center py-1 items-center'>
-                    <button className=' bg-gradient-to-br from-blue-600 via-violet-600  to-purple-600  hover:scale-105 transition-all duration-300 cursor-pointer text-2xl rounded-md px-4 py-2'>
-                      <h1 className='text-gray-100'>LuminaAI</h1>
+              {isAskAI && (
+                <div className="progressBar border mb-3 border-purple-700 bg-gradient-to-r from-pink-800 via-purple-800 to-blue-800 rounded-xl p-2 transition-opacity duration-300">
+                  <h1 className="flex justify-center items-center text-3xl font-sans">Ask With AI</h1>
+                  <p className="flex justify-center items-center text-gray-300 text-sm py-2">
+                    Search with LuminaAI
+                  </p>
+                  <div className="flex justify-center py-1 items-center">
+                    <button
+                      onClick={() => askForAi()}
+                      className="bg-gradient-to-br from-blue-600 via-violet-600 to-purple-600 hover:scale-105 transition-all duration-300 cursor-pointer text-2xl rounded-md px-4 py-2"
+                    >
+                      <h1 className="text-gray-100">LuminaAI</h1>
                     </button>
                   </div>
-                </div> : null
-              }
-
-              {/* Submit Btn */}
-              {/* {
-              crrIndex === quizData.length - 1 ?  <div className=' flex justify-center items-center'>
-                <button className={`px-10 right-0  py-2 ${!userAnswers[crrIndex] ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-orange-800 '} rounded-md bg-orange-950 transition-all duration-300 text-gray-100  font-semibold mr-3 my-2 border border-orange-500`}>Submit</button>
-              </div> : null
-             } */}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+      {showAiBot && (
+        <div className="fixed bottom-5 right-5 w-96 rounded-xl  p-3 z-50">
+          <LuminaAiChatBot />
+        </div>
+      )}
       {
         isModal && (
           <SubmitModalCard
             submitQuiz={() => dispatch(setIsSubmitQuiz(true))}
             closeModal={() => dispatch(setisModal(false))}
+          />
+        )
+      }
+      {
+        cancelQuizModal && (
+          <CancelModalCard
+            submitQuiz={() => dispatch(backToMainMenu())}
+            closeModal={() => dispatch(setcancelQuizModal(false))}
           />
         )
       }
