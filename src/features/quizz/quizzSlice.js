@@ -36,6 +36,8 @@ export const quizSlice = createSlice({
         isQuizStart: false,
         userAnswers: [],
         answerStatus: [],
+        showAiBot: false,
+        cancelQuizModal: false,
 
     },
     reducers: {
@@ -69,7 +71,9 @@ export const quizSlice = createSlice({
         },
         setStartTimer: (state, action) => {
             const { index, intervalId } = action.payload
-            state.questionInterval[index] = intervalId
+            if (!state.questionInterval[index]) {
+                state.questionInterval[index] = intervalId
+            }
         },
         setStopTimer: (state, action) => {
             const index = action.payload
@@ -123,13 +127,15 @@ export const quizSlice = createSlice({
                 state.score = 0
                 state.crrIndex = 0
                 state.questionInterval = {}
-                state. questionTimer = {}
+                state.questionTimer = {}
                 state.isAskAI = false
-                // reset other fields you need
             }
         },
         backToMainMenu: (state) => {
             const n = state.quizData.length
+            Object.values(state.questionInterval).forEach(id => clearInterval(id))
+            state.questionInterval = {}
+            state.questionTimer = {}
             state.quizData = []
             state.isQuizStart = false
             state.userAnswers = Array(n).fill(null)
@@ -138,6 +144,24 @@ export const quizSlice = createSlice({
             state.score = 0
             state.crrIndex = 0
             state.isAskAI = false
+
+        },
+        setIsAskAi: (state, action) => {
+            state.isAskAI = action.payload;
+        },
+        setShowAiBot: (state, action) => {
+            state.showAiBot = action.payload;
+        },
+        setcancelQuizModal: (state, action) => {
+            state.cancelQuizModal = action.payload;
+        },
+        tickTimer: (state, action) => {
+            const index = action.payload;
+            if (state.questionTimer[index] === undefined) {
+                state.questionTimer[index] = 1;
+            } else {
+                state.questionTimer[index] += 1;
+            }
         }
     },
     extraReducers: (builder) => {
@@ -162,6 +186,6 @@ export const quizSlice = createSlice({
     }
 })
 
-export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz, backToMainMenu, setStopTimer, setStartTimer, setIncrementTimer, resetTimer, resetQuizOnReload, setisModal } = quizSlice.actions
+export const { setFormData, setCrrIndex, setIncrementCrrIndex, setDecrementCrrIndex, setUserAnswer, setAnswerStatus, setCorrectAnswer, setIncorrectAnswer, setIsAskAi, setIsSubmitQuiz, resetQuiz, backToMainMenu, setStopTimer, setStartTimer, setIncrementTimer, resetTimer, resetQuizOnReload, setisModal, toggleAiBot, setShowAiBot, setcancelQuizModal, tickTimer } = quizSlice.actions
 
 export const quizReducer = quizSlice.reducer
