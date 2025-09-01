@@ -7,13 +7,6 @@ const UserChoice = () => {
     const { quizData, isLoading, status, formData, isQuizStart, } = useSelector(s => s.quiz)
     const dispatch = useDispatch()
 
-    useEffect(() => {
-        console.log('Data - ', quizData);
-        console.log('Status - ', status)
-        console.log('Loading - ', isLoading)
-        console.log('QuizStarted - ', isQuizStart);
-    }, [quizData, isLoading, status, isQuizStart])
-
     const handleChange = (e) => {
         const { name, value } = e.target
         dispatch(setFormData({ name, value }))
@@ -34,7 +27,7 @@ const UserChoice = () => {
                     <label className='text-2xl text-gray-300 w-full py-2' >Select Amount Of Question's</label>
                     <br />
                     <select
-                        className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
+                        className=' bg-gray-600 text-gray-200 px-2 w-full mt-4 py-3 rounded-lg'
                         id="amount"
                         name="amount"
                         value={formData.amount}
@@ -51,7 +44,7 @@ const UserChoice = () => {
                     <label className='text-2xl text-gray-300 w-full py-2' >Select Difficulty</label>
                     <br />
                     <select
-                        className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
+                        className=' bg-gray-600 text-gray-200 px-2 w-full mt-4 py-3 rounded-lg'
                         id="difficulty"
                         name="difficulty"
                         value={formData.difficulty}
@@ -69,7 +62,7 @@ const UserChoice = () => {
                     <label className='text-2xl text-gray-300 w-full py-2' >Select Type</label>
                     <br />
                     <select
-                        className=' bg-gray-600 text-gray-400 px-2 w-full mt-4 py-3 rounded-lg'
+                        className=' bg-gray-600 text-gray-200 px-2 w-full mt-4 py-3 rounded-lg'
                         id="type"
                         name="type"
                         value={formData.type}
