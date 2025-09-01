@@ -20,6 +20,7 @@ function App() {
           ) : (
             <UserChoice />
           )
+          // <LuminaAiChatBot/>
         }
       </div>
     </>
