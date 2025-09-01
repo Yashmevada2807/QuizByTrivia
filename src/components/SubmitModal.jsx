@@ -8,14 +8,9 @@ const SubmitModal = () => {
     const closeModal = () => {
         setIsSubmitQuiz(false)
     }
-
-    const submitQuiz = () => {
-        
-    }
-
     return (
         <>
-        <SubmitModalCard submitQuiz={submitQuiz} closeModal={closeModal} />
+        <SubmitModalCard  closeModal={closeModal} />
         </>
     )
 }
