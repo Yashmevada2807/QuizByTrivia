@@ -7,6 +7,26 @@ import storage from 'redux-persist/lib/storage'
 const quizPersistConfig = {
     key: 'quiz',
     storage,
+    // whitelist: [
+    //     'formData',
+    //     'quizData',
+    //     'userAnswers',
+    //     'answerStatus',
+    //     'score',
+    //     'crrIndex',
+    //     'isQuizStart',
+    //     'isSubmitQuiz'
+    // ],
+    // blacklist: [
+    //     'isLoading',
+    //     'status',
+    //     'errors',
+    //     'questionTimer',
+    //     'questionInterval',
+    //     'isModal',
+    //     'isAskAI'
+    // ]
+
 }
 
 const rootReducer = combineReducers({
@@ -14,7 +34,7 @@ const rootReducer = combineReducers({
 })
 
 export const store = configureStore({
-    reducer : rootReducer
+    reducer: rootReducer
 })
 
 export const persistor = persistStore(store)
