@@ -71,7 +71,7 @@ const LuminaAiChatBot = () => {
             console.error(error);
             setMessages((prev) => [
                 ...prev,
-                { role: "assistant", content: "Server Error..." },
+                { role: "assistant", content: "Server is not responding try again later...." },
             ]);
         } finally {
             setloading(false);
