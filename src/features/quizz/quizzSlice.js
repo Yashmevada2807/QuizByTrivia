@@ -30,6 +30,7 @@ export const quizSlice = createSlice({
         crrIndex: 0,
         questionTimer: {},
         questionInterval: {},
+        activeTimerIndex: null,
         isModal: false,
         isSubmitQuiz: false,
         isAskAI: false,
@@ -71,15 +72,24 @@ export const quizSlice = createSlice({
         },
         setStartTimer: (state, action) => {
             const { index, intervalId } = action.payload
-            if (!state.questionInterval[index]) {
-                state.questionInterval[index] = intervalId
+            // Stop any currently active timer
+            if (state.activeTimerIndex !== null && state.questionInterval[state.activeTimerIndex]) {
+                clearInterval(state.questionInterval[state.activeTimerIndex])
             }
+            // Set new active timer
+            state.activeTimerIndex = index
+            state.questionInterval[index] = intervalId
         },
         setStopTimer: (state, action) => {
             const index = action.payload
             if (state.questionInterval[index]) {
                 clearInterval(state.questionInterval[index])
-                // delete state.questionInterval[index]
+                // Only clear activeTimerIndex if this was the active timer
+                if (state.activeTimerIndex === index) {
+                    state.activeTimerIndex = null
+                }
+                // Remove the interval from the state to prevent restart
+                delete state.questionInterval[index]
             }
         },
         setUserAnswer: (state, action) => {
@@ -101,6 +111,7 @@ export const quizSlice = createSlice({
             Object.values(state.questionInterval).forEach(id => clearInterval(id))
             state.questionInterval = {}
             state.questionTimer = {}
+            state.activeTimerIndex = null
         },
         resetQuiz: (state) => {
             const n = state.quizData.length
@@ -116,6 +127,7 @@ export const quizSlice = createSlice({
             Object.values(state.questionInterval).forEach(id => clearInterval(id))
             state.questionInterval = {}
             state.questionTimer = {}
+            state.activeTimerIndex = null
         },
         resetQuizOnReload: (state) => {
             if (state.quizData.length > 0) {
@@ -128,6 +140,7 @@ export const quizSlice = createSlice({
                 state.crrIndex = 0
                 state.questionInterval = {}
                 state.questionTimer = {}
+                state.activeTimerIndex = null
                 state.isAskAI = false
             }
         },
@@ -136,6 +149,7 @@ export const quizSlice = createSlice({
             Object.values(state.questionInterval).forEach(id => clearInterval(id))
             state.questionInterval = {}
             state.questionTimer = {}
+            state.activeTimerIndex = null
             state.quizData = []
             state.isQuizStart = false
             state.userAnswers = Array(n).fill(null)
