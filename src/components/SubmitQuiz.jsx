@@ -16,7 +16,6 @@ const SubmitQuiz = () => {
 
     const totalTime = Object.values(questionTimer).reduce((sum, time) => sum + (time || 0), 0);
     const averageTime = (totalTime / totalQuestions).toFixed(1);
-
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
