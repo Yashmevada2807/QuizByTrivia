@@ -9,7 +9,7 @@ import CancelModalCard from './CancelModalCard'
 
 const QuizzCard = () => {
 
-  const { isQuizStart, isLoading, status, isModal, isAskAI, quizData, userAnswers, answerStatus, score, questionTimer, questionInterval, showAiBot, cancelQuizModal } = useSelector(s => s.quiz)
+  const { isQuizStart, isLoading, status, isModal, isAskAI, quizData, userAnswers, answerStatus, score, questionTimer, questionInterval, activeTimerIndex, showAiBot, cancelQuizModal } = useSelector(s => s.quiz)
   const dispatch = useDispatch()
   const crrIndex = useSelector((state) => state.quiz.crrIndex);
 
@@ -24,36 +24,23 @@ const QuizzCard = () => {
   ).length;
 
   const progress = (answeredCount / quizData.length) * 100;
-  // timer tracker
   const formatTime = (totalSeconds) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-
     let result = "";
     if (hours > 0) result += `${hours} hr `;
     if (minutes > 0) result += `${minutes} min `;
     result += `${seconds} sec`;
-
     return result.trim();
   };
 
-  useEffect(() => {
-    const entries = performance.getEntriesByType('navigation')
-    const isReload = entries.length > 0 && entries[0].type === 'reload'
-    if (quizData?.length > 0) {
-      if (isReload) {
-        Object.values(questionInterval).forEach((id) => clearInterval(id));
-        dispatch(resetQuizOnReload())
-      } else {
-        handlestartTimer(0)
-      }
-    }
-  }, [quizData, dispatch])
+  
 
   // StartTimerFunc
   const handlestartTimer = (qIndex) => {
-    if (!questionInterval[qIndex]) {
+    // Only start timer if it's not already running for this question AND the question hasn't been answered
+    if (activeTimerIndex !== qIndex && userAnswers[qIndex] === null) {
       const intervalId = setInterval(() => {
         dispatch(setIncrementTimer(qIndex))
       }, 1000);
@@ -68,7 +55,6 @@ const QuizzCard = () => {
 
   // SubmitCorrectAnswerFunc
   const submitCorrectAnswer = (ans, id) => {
-    // prevent overwrite if already answered
     if (userAnswers[id] !== null) return;
     if (ans === Question.correct_answer) {
       dispatch(setAnswerStatus({ index: id, status: 'correct' }));
@@ -79,9 +65,41 @@ const QuizzCard = () => {
     }
     handlestopTimer(id)
     dispatch(setIsAskAi(true))
-    // store the chosen answer at that index
     dispatch(setUserAnswer({ index: id, answer: ans }));
   };
+  useEffect(() => {
+    const entries = performance.getEntriesByType('navigation')
+    const isReload = entries.length > 0 && entries[0].type === 'reload'
+    if (quizData?.length > 0) {
+      if (isReload) {
+        Object.values(questionInterval).forEach((id) => clearInterval(id));
+        dispatch(resetQuizOnReload())
+      } else {
+        // Only start timer for the first question when quiz starts
+        if (crrIndex === 0 && activeTimerIndex === null) {
+          handlestartTimer(0)
+        }
+      }
+    }
+  }, [quizData, dispatch, crrIndex, activeTimerIndex])
+
+  // Effect to manage timer when current index changes
+  useEffect(() => {
+    if (quizData?.length > 0 && isQuizStart) {
+      // Start timer for current question if it's not already active and not answered
+      if (activeTimerIndex !== crrIndex && userAnswers[crrIndex] === null) {
+        handlestartTimer(crrIndex);
+      }
+    }
+  }, [crrIndex, quizData, isQuizStart, activeTimerIndex, userAnswers])
+
+  // Cleanup effect when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up any running intervals when component unmounts
+      Object.values(questionInterval).forEach(id => clearInterval(id));
+    };
+  }, [questionInterval])
 
   // AskAiHandlerfunc
   const askForAi = () => {
@@ -104,10 +122,8 @@ const skipQuestion = () => {
     const nextIndex = crrIndex + 1;
     dispatch(setIncrementCrrIndex());
 
-    // start/resume next
-    if (!questionInterval[nextIndex]) {
-      handlestartTimer(nextIndex);
-    }
+    // start/resume next question timer
+    handlestartTimer(nextIndex);
   } else {
     console.log("Last Question");
   }
@@ -117,17 +133,10 @@ const skipQuestion = () => {
 const nextQuestion = () => {
   const nextIndex = crrIndex + 1;
   if (nextIndex < quizData.length) {
-    // 1. Stop current question timer
     handlestopTimer(crrIndex);
-
-    // 2. Move next
     dispatch(setIncrementCrrIndex());
     dispatch(setIsAskAi(false));
-
-    // 3. Start/resume timer for next
-    if (!questionInterval[nextIndex]) {
-      handlestartTimer(nextIndex);
-    }
+    handlestartTimer(nextIndex);
   } else {
     dispatch(setisModal(true));
     console.log("No more questions");
@@ -141,38 +150,24 @@ const PrevQuestion = () => {
     console.log("First Question");
     return;
   }
-
-  // target index
   const prevIndex = crrIndex - 1;
-
-  // 1) stop the current question's timer
   handlestopTimer(crrIndex);
-
-  // 2) move to the previous question
   dispatch(setDecrementCrrIndex());
-
-  // 3) start/resume the previous question's timer
-  if (!questionInterval[prevIndex]) {
+  // Only start timer if the previous question hasn't been answered
+  if (userAnswers[prevIndex] === null) {
     handlestartTimer(prevIndex);
   }
 };
 
 // findQuestionWithIndexFunc
 const findQuestionWithIndex = (index) => {
-  // 1. Stop current timer
   handlestopTimer(crrIndex);
-
-  // 2. Move to clicked question
   dispatch(setCrrIndex(index));
-
-  // 3. Resume/start that question timer
-  if (!questionInterval[index]) {
+  // Only start timer if the selected question hasn't been answered
+  if (userAnswers[index] === null) {
     handlestartTimer(index);
   }
 };
-
-
-
 
   return (
     <>
